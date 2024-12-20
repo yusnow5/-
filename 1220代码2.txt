@@ -1,0 +1,246 @@
+#include<iostream>
+#include<vector>
+#include <fstream>
+#include <algorithm>
+using namespace std;
+ofstream outFile("慧珍代码结果测试.txt");
+unsigned long long factorialIterative(int n) {
+    long long result = 1;
+    for (int i = 2; i <= n; ++i) {
+        result *= i;
+    }
+    return result;
+}
+
+double caculation(vector<double> data, double k) {
+    double result1 = 1;
+    for (auto subdata : data) {
+        result1 *= subdata;
+    }
+    double result2 = 0;
+    result2 = (result1 - 1) / k;
+    return result2;
+}
+vector<int> path;
+vector<vector<int>> result;
+void backtracking(int n, int startIndex) {
+    for (int i = startIndex; i <= n; i++) {
+        path.push_back(i); // 处理节点
+        result.push_back(path);
+        backtracking(n, i + 1); // 递归
+        path.pop_back(); // 回溯，撤销处理的节点
+    }
+}
+
+vector<int> path2;
+vector<vector<int>> result2;
+void backtracking2(int n, int startIndex, vector<int> exist) {
+    for (int i = startIndex; i <= n; i++) {
+        if (find(exist.begin(), exist.end(), i) != exist.end()) continue;
+        path2.push_back(i); // 处理节点
+        result2.push_back(path2);
+        backtracking2(n, i + 1, exist); // 递归
+        path2.pop_back(); // 回溯，撤销处理的节点
+    }
+}
+
+double caculation2(vector<int> Sdata, vector<int> Tdata) {
+
+    double result = 0;
+    int k11 = 13 - Tdata.size() - Sdata.size();
+    double k1 = factorialIterative(k11);
+    int k22 = Tdata.size();
+    double k2 = factorialIterative(k22);
+    int k33 = 13 - Sdata.size() + 1;
+    double k3 = factorialIterative(k33);
+    result = k1 * k2 / k3;
+    return result;
+}
+
+int main() {
+
+    if (!outFile.is_open()) {
+        std::cerr << "无法打开文件" << std::endl;
+        return 1;
+    }
+    double maindata[13] = {
+ 0.9625
+,0.9632
+,0.9644
+,0.981
+,0.9632
+,0.9689
+,0.9675
+,0.9699
+,0.9575
+,0.9736
+,0.9621
+,0.9689
+,0.9619
+    };
+    double onedata[13] = { 0.1047,0.1028,0.0995,0.0531,0.1027,0.0869,0.0909,0.084,0.1188,0.0737,0.1058,0.0869,0.1066 };
+    backtracking(4, 1);
+    // 按照子集的长度排序
+    //int count = 0;
+    sort(result.begin(), result.end(), [](const vector<int>& a, const vector<int>& b) {
+        if (a.size() != b.size()) {
+            return a.size() < b.size();
+        }
+        else {
+            // 如果子集长度相等，则按照子集内元素的大小进行排序
+            for (int i = 0; i < a.size(); i++) {
+                if (a[i] != b[i]) {
+                    return a[i] < b[i];
+                }
+            }
+            return false; // 如果子集完全相同，则不需要交换位置
+        }
+        });
+
+    //输出排序后的结果
+   //for (const auto& subset : result) {
+   //    if (subset.size() >= 2) {
+   //        vector<double> cacudata;
+   //        outFile << "组合  ";
+   //        for (int num : subset) {
+   //   
+   //            outFile << num << " ";
+   //            //cout << maindata[num - 1] << " ";
+   //            cacudata.push_back(maindata[num - 1]);
+   //            //outFile << num << " ";
+   //        }
+   //        double mainresult =caculation(cacudata, -0.358);
+   //        outFile << "结果  ";
+   //        outFile << mainresult << " ";
+   //        //count++;
+   //        outFile << endl;
+   //        //outFile << endl;
+   //    }
+   //}
+
+   //T S计算
+    for (const auto& subSset : result) {//subSset为每个S
+
+        vector<int> STdata;
+        vector<double> cacuSTdata;
+        double sumST = 0;
+        outFile << "S组合  ";
+        for (auto numS : subSset) {
+            outFile << numS << " ";//完成列出S
+            STdata.push_back(numS);
+            cacuSTdata.push_back(maindata[numS - 1]);
+            //outFile << num << " ";
+        }
+
+        outFile << endl;
+
+
+        backtracking2(4, 1, subSset);
+        sort(result2.begin(), result2.end(), [](const vector<int>& a, const vector<int>& b) {
+            if (a.size() != b.size()) {
+                return a.size() < b.size();
+            }
+            else {
+                // 如果子集长度相等，则按照子集内元素的大小进行排序
+                for (int i = 0; i < a.size(); i++) {
+                    if (a[i] != b[i]) {
+                        return a[i] < b[i];
+                    }
+                }
+                return false; // 如果子集完全相同，则不需要交换位置
+            }
+            });
+
+        result2.push_back(vector<int>{0});
+        //完成T的所有组合result2
+
+        for (auto& subTset : result2) {//subTset为每个T
+            vector<double> cacuTdata;
+            vector<int> Tdata;
+            outFile << "T组合  ";
+            vector<int> tempSTdata = STdata;
+            vector<double> tempcacuSTdata = cacuSTdata;
+            for (auto numT : subTset) {
+                outFile << numT << " ";//完成列出T
+                //if (numT == 0) {//新补充
+                //    if (tempSTdata.size() == 1) {
+                //        tempcacuSTdata.pop_back();
+                //        tempcacuSTdata.push_back(onedata[numT - 1]); // 使用 onedata
+                //    }
+                //    else {
+                //        tempcacuSTdata.push_back(maindata[numT - 1]); // 使用 maindata
+                //    }
+                //}else {
+                tempSTdata.push_back(numT);
+                Tdata.push_back(numT);
+                tempcacuSTdata.push_back(maindata[numT - 1]);
+                if (subTset.size() == 1) {
+                    cacuTdata.push_back(onedata[numT - 1]); // 使用 onedata
+                }
+                else {
+                    cacuTdata.push_back(maindata[numT - 1]); // 使用 maindata
+                }
+                // }
+
+            }
+            outFile << endl;
+
+            outFile << "st数组内容 ";
+            for (auto setST : tempcacuSTdata) {
+                outFile << setST << " ";
+            }
+            outFile << "t数组内容 ";
+            for (auto setT : cacuTdata) {
+                outFile << setT << " ";
+            }
+
+            double resultST = 0;
+            //if (subTset[0] == 0) {//新补充
+            //    vector<int> temp;
+            //    resultST = caculation2(subSset, temp);
+            //}else resultST = caculation2(subSset, subTset);
+
+            resultST = caculation2(subSset, subTset);
+            outFile << "首项计算  ";
+            outFile << resultST << "  ";
+
+            double k1 = 0;
+            //if (cacuSTdata.size() == 1) {//新补充
+            //    k1 = tempcacuSTdata[0];
+            //}else  k1 = caculation(tempcacuSTdata, -0.358);
+
+            k1 = caculation(tempcacuSTdata, -0.358);
+
+            double k2 = 0;
+            if (cacuTdata.size() == 1) {
+                k2 = cacuTdata[0];
+            }
+            else  k2 = caculation(cacuTdata, -0.358);
+            outFile << "ST计算  ";
+            outFile << k1 << "  ";
+            outFile << "T计算  ";
+            outFile << k2 << "  ";
+            double resultfinalST = resultST * (k1 - k2);
+            outFile << "ST结果  ";
+            outFile << resultfinalST;
+            sumST += resultfinalST;
+            outFile << endl;
+
+            resultST = 0;
+            k1 = 0;
+            k2 = 0;
+            resultfinalST = 0;
+        }
+        outFile << "所有ST求和结果  ";
+        outFile << sumST;
+        outFile << endl;
+        outFile << endl;
+        //outFile << endl;
+        path2.clear();
+        result2.clear();
+    }
+
+    outFile.close();
+    system("pause");
+    return 0;
+}
